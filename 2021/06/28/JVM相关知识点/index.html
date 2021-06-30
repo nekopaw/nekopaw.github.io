@@ -103,7 +103,7 @@
 <meta property="og:description" content="JVM&amp;emsp;HotSpot JVM把年轻代分为了三部分：1个Eden区和2个Survivor区（分别叫from和to）。默认比例为8：1，一般情况下，新创建的对象都会被分配到Eden区(一些大对象特殊处理),这些对象经过第一次Minor GC后，如果仍然存活，将会被移到Survivor区。对象在Survivor区中每熬过一次Minor GC，年龄就会增加1岁，当它的年龄增加到一定程度时，就会">
 <meta property="og:locale">
 <meta property="article:published_time" content="2021-06-28T08:48:16.000Z">
-<meta property="article:modified_time" content="2021-06-28T09:43:12.146Z">
+<meta property="article:modified_time" content="2021-06-28T12:51:08.571Z">
 <meta property="article:author" content="nekopaw">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JVM">
@@ -470,7 +470,11 @@
 </ul>
 </li>
 <li><h3 id="CMS收集器"><a href="#CMS收集器" class="headerlink" title="CMS收集器"></a>CMS收集器</h3><ul>
-<li><strong>CMS(Concurrent Mark Sweep)收集器</strong>是以获取最短回收停顿时间为目标的收集器，使用（标记-清除）算法，整个过程分为4个步骤：<br>  &emsp;①.<span style="color:pink">初始标记（CMS initial mark）</span>：标记一下GC Roots就能直接关联到对象，速度很快，期间会暂停其它线程。<br>  &emsp;②.<span style="color:pink">并发标记（CMS concurrent mark）</span>：进行GC Roots Tracing的过程。<br>  &emsp;③.<span style="color:pink">重新标记（CMS remark）</span>：修正并发标记期间因用户程序继续运作而导致标记产生变动的那一部分对象的标记记录，期间会暂停其它线程。<br>  &emsp;④.<span style="color:pink">并发清除（CMS concurrent sweep）</span><br>  <strong>CMS收集器无法处理浮动垃圾</strong>（Floating Garbage：并发清除时用户线程产生的新垃圾），可能出现<strong>“Concurrent Mode Failure”</strong>而导致另一次<strong>Full GC</strong>的产生。<br>  &emsp;CMS收集器在JDK1.5中默认当老年代使用了68%空间后就会被激活，若应用中老年代增长不是太快可以适当调整参数：<em><strong>“ -XX:CMSInitiationgOccupancyFraction”</strong></em>以便降低内存回收次数，从而获得更好的性能。JDK1.6中默认值已提升至92%。<br>  &emsp;若CMS运行时预留内存不够会出现<strong>“Concurrent Mode Failure”</strong>，这时虚拟机将启动后备预案：临时启用Serial Old收集器来重新进行老年代的垃圾回收，所以若是参数设置得太高容易导致大量的<strong>“Concurrent Mode Failure”</strong>，性能反而降低。<br>  &emsp;CMS有一个默认开启的参数：<em><strong>“-XX:UseCMSCompactAtFullCollection”</strong></em>（内存碎片合并整理），但是由于内存整理无法并发进行，会导致停顿时间变长。还有一个参数：<em><strong>“-XX:CMSFullGCsBeforeCompation”</strong></em>设置执行多少次Full GC后会执行一次内存碎片压缩（默认值为0）</br></li>
+<li><strong>CMS(Concurrent Mark Sweep)收集器</strong>是以获取最短回收停顿时间为目标的收集器，使用（标记-清除）算法，整个过程分为4个步骤：  &emsp;①.<span style="color:pink">初始标记（CMS initial mark）</span>：标记一下GC Roots就能直接关联到对象，速度很快，期间会暂停其它线程。  &emsp;②.<span style="color:pink">并发标记（CMS concurrent mark）</span>：进行GC Roots Tracing的过程。  &emsp;③.<span style="color:pink">重新标记（CMS remark）</span>：修正并发标记期间因用户程序继续运作而导致标记产生变动的那一部分对象的标记记录，期间会暂停其它线程。  &emsp;④.<span style="color:pink">并发清除（CMS concurrent sweep）</span></li>
+<li><strong>CMS收集器无法处理浮动垃圾</strong>（Floating Garbage：并发清除时用户线程产生的新垃圾），可能出现<strong>“Concurrent Mode Failure”</strong>而导致另一次<strong>Full GC</strong>的产生。</li>
+<li>CMS收集器在JDK1.5中默认当老年代使用了68%空间后就会被激活，若应用中老年代增长不是太快可以适当调整参数：<em><strong>“ -XX:CMSInitiationgOccupancyFraction”</strong></em>以便降低内存回收次数，从而获得更好的性能。JDK1.6中默认值已提升至92%。</li>
+<li>若CMS运行时预留内存不够会出现<strong>“Concurrent Mode Failure”</strong>，这时虚拟机将启动后备预案：临时启用Serial Old收集器来重新进行老年代的垃圾回收，所以若是参数设置得太高容易导致大量的<strong>“Concurrent Mode Failure”</strong>，性能反而降低。</li>
+<li>CMS有一个默认开启的参数：<em><strong>“-XX:UseCMSCompactAtFullCollection”</strong></em>（内存碎片合并整理），但是由于内存整理无法并发进行，会导致停顿时间变长。还有一个参数：<em><strong>“-XX:CMSFullGCsBeforeCompation”</strong></em>设置执行多少次Full GC后会执行一次内存碎片压缩（默认值为0）</br></li>
 </ul>
 </li>
 <li><h3 id="G1收集器"><a href="#G1收集器" class="headerlink" title="G1收集器"></a>G1收集器</h3><p> <strong>G1是面向服务端应用的垃圾收集器</strong>。具有以下特点：</p>
@@ -485,11 +489,28 @@
 </ol>
 </br>
 
-<h2 id="JVM调优"><a href="#JVM调优" class="headerlink" title="JVM调优"></a>JVM调优</h2><p>&emsp;<strong>老年代堆空间被占满</strong>，Full GC也无法回收触发异常：<span style="color:red">“java.lang.OutOfMemoryError:Java heap space”</span><br>&emsp;<span style="color:pink"><strong>解决方案：</strong></span><br>        1. 代码内的内存泄露可以通过一些分析工具进行分析，然后找出泄露点进行改善<br>        2. 优化代码和增加Survivor Space 等方法去优化</p>
-<p>&emsp;<strong>持久代被占满</strong>，无法为新得class分配存储空间而引发异常：<span style="color:red">“java.lang.OutOfMemoryError: PermGen space”</span><br>&emsp;<span style="color:pink"><strong>解决方案：</strong></span><br>        1. 增加持久代的空间 <strong>-XX:MaxPermSize=100M</strong><br>        2. 如果有自定义类加载的需要排除下自己的代码问题</p>
+<h2 id="JVM调优"><a href="#JVM调优" class="headerlink" title="JVM调优"></a>JVM调优</h2><p>&emsp;<strong>老年代堆空间被占满</strong>，Full GC也无法回收触发异常：<span style="color:red">“java.lang.OutOfMemoryError:Java heap space”</span></p>
+<p>&emsp;<span style="color:pink"><strong>解决方案：</strong></span></p>
+<ol>
+<li>代码内的内存泄露可以通过一些分析工具进行分析，然后找出泄露点进行改善</li>
+<li>优化代码和增加Survivor Space 等方法去优化</li>
+</ol>
+<p>&emsp;<strong>持久代被占满</strong>，无法为新得class分配存储空间而引发异常：<span style="color:red">“java.lang.OutOfMemoryError: PermGen space”</span></p>
+<p>&emsp;<span style="color:pink"><strong>解决方案：</strong></span></p>
+<ol>
+<li>增加持久代的空间 <strong>-XX:MaxPermSize=100M</strong></li>
+<li>如果有自定义类加载的需要排除下自己的代码问题</li>
+</ol>
 <p>&emsp;<strong>堆栈溢出</strong>，一般就是递归没有返回，或者循环调用造成异常：<span style="color:red">“java.lang.StackOverflowError”</sapn></p>
-<p>&emsp;<strong>线程堆栈满</strong>，线程空间满了以后出现异常：<span style="color:red">“Fatal:Stack size too small”</span><br>&emsp;<span style="color:pink"><strong>解决方案：</strong></span><br>&emsp;增加线程栈大小，-Xss2m,但这个配置无法解决根本问题，还是要看代码部分是否有遗漏</p>
-<p>&emsp;<strong>系统内存被占满</strong>，线程数量达到一定程度操作系统无法分配资源出现异常：<span style="color:red">“java.lang.OutOfMemoryError:unable to create new native thread”</span><br>&emsp;<span style="color:pink"><strong>解决方案：</strong></span><br>        1. 重新设计系统减少线程数量<br>        2. 线程数量不能减少的情况下，通过-Xss减小单个线程大小。</p>
+<p>&emsp;<strong>线程堆栈满</strong>，线程空间满了以后出现异常：<span style="color:red">“Fatal:Stack size too small”</span></p>
+<p>&emsp;<span style="color:pink"><strong>解决方案：</strong></span></p>
+<p>&emsp;增加线程栈大小，**-Xss2m**,但这个配置无法解决根本问题，还是要看代码部分是否有遗漏</p>
+<p>&emsp;<strong>系统内存被占满</strong>，线程数量达到一定程度操作系统无法分配资源出现异常：<span style="color:red">“java.lang.OutOfMemoryError:unable to create new native thread”</span></p>
+<p>&emsp;<span style="color:pink"><strong>解决方案：</strong></span></p>
+<ol>
+<li>重新设计系统减少线程数量</li>
+<li>线程数量不能减少的情况下，通过-Xss减小单个线程大小。</li>
+</ol>
 
       
     </div>
@@ -519,7 +540,7 @@
   <p><span>本文标题:</span><a href="/2021/06/28/JVM%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E7%82%B9/">JVM相关知识点</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 nekopaw 的个人博客">nekopaw</a></p>
   <p><span>发布时间:</span>2021年06月28日 - 16:48</p>
-  <p><span>最后更新:</span>2021年06月28日 - 17:43</p>
+  <p><span>最后更新:</span>2021年06月28日 - 20:51</p>
   <p><span>原始链接:</span><a href="/2021/06/28/JVM%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E7%82%B9/" title="JVM相关知识点">http://example.com/2021/06/28/JVM%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E7%82%B9/</a>
     <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="http://example.com/2021/06/28/JVM%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E7%82%B9/"  aria-label="复制成功！"></i></span>
   </p>
@@ -576,6 +597,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/06/28/IoC%E4%B8%8EDI/" rel="prev" title="IoC与DI">
+                IoC与DI <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -670,7 +695,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -681,7 +706,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -717,6 +742,272 @@
 
           
 
+          
+            <div style="">
+  <canvas id="canvas" style="width:60%;">当前浏览器不支持canvas，请更换浏览器后再试</canvas>
+</div>
+<script>
+(function(){
+
+   var digit=
+    [
+        [
+            [0,0,1,1,1,0,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,0,1,1,0],
+            [0,0,1,1,1,0,0]
+        ],//0
+        [
+            [0,0,0,1,1,0,0],
+            [0,1,1,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [1,1,1,1,1,1,1]
+        ],//1
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,1,1],
+            [1,1,1,1,1,1,1]
+        ],//2
+        [
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//3
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,0],
+            [0,0,1,1,1,1,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,1,1,0],
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,1]
+        ],//4
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,1,1,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//5
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//6
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0]
+        ],//7
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//8
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,1,1,0,0,0,0]
+        ],//9
+        [
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0]
+        ]//:
+    ];
+
+var canvas = document.getElementById('canvas');
+
+if(canvas.getContext){
+    var cxt = canvas.getContext('2d');
+    //声明canvas的宽高
+    var H = 100,W = 700;
+    canvas.height = H;
+    canvas.width = W;
+    cxt.fillStyle = '#f00';
+    cxt.fillRect(10,10,50,50);
+
+    //存储时间数据
+    var data = [];
+    //存储运动的小球
+    var balls = [];
+    //设置粒子半径
+    var R = canvas.height/20-1;
+    (function(){
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        //存储时间数字，由十位小时、个位小时、冒号、十位分钟、个位分钟、冒号、十位秒钟、个位秒钟这7个数字组成
+        data.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+    })();
+
+    /*生成点阵数字*/
+    function renderDigit(index,num){
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    cxt.beginPath();
+                    cxt.arc(14*(R+2)*index + j*2*(R+1)+(R+1),i*2*(R+1)+(R+1),R,0,2*Math.PI);
+                    cxt.closePath();
+                    cxt.fill();
+                }
+            }
+        }
+    }
+
+    /*更新时钟*/
+    function updateDigitTime(){
+        var changeNumArray = [];
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        var NewData = [];
+        NewData.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+        for(var i = data.length-1; i >=0 ; i--){
+            //时间发生变化
+            if(NewData[i] !== data[i]){
+                //将变化的数字值和在data数组中的索引存储在changeNumArray数组中
+                changeNumArray.push(i+'_'+(Number(data[i])+1)%10);
+            }
+        }
+        //增加小球
+        for(var i = 0; i< changeNumArray.length; i++){
+            addBalls.apply(this,changeNumArray[i].split('_'));
+        }
+        data = NewData.concat();
+    }
+
+    /*更新小球状态*/
+    function updateBalls(){
+        for(var i = 0; i < balls.length; i++){
+            balls[i].stepY += balls[i].disY;
+            balls[i].x += balls[i].stepX;
+            balls[i].y += balls[i].stepY;
+            if(balls[i].x > W + R || balls[i].y > H + R){
+                balls.splice(i,1);
+                i--;
+            }
+        }
+    }
+
+    /*增加要运动的小球*/
+    function addBalls(index,num){
+        var numArray = [1,2,3];
+        var colorArray =  ["#3BE","#09C","#A6C","#93C","#9C0","#690","#FB3","#F80","#F44","#C00"];
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    var ball = {
+                        x:14*(R+2)*index + j*2*(R+1)+(R+1),
+                        y:i*2*(R+1)+(R+1),
+                        stepX:Math.floor(Math.random() * 4 -2),
+                        stepY:-2*numArray[Math.floor(Math.random()*numArray.length)],
+                        color:colorArray[Math.floor(Math.random()*colorArray.length)],
+                        disY:1
+                    };
+                    balls.push(ball);
+                }
+            }
+        }
+    }
+
+    /*渲染*/
+    function render(){
+        //重置画布宽度，达到清空画布的效果
+        canvas.height = 100;
+        //渲染时钟
+        for(var i = 0; i < data.length; i++){
+            renderDigit(i,data[i]);
+        }
+        //渲染小球
+        for(var i = 0; i < balls.length; i++){
+            cxt.beginPath();
+            cxt.arc(balls[i].x,balls[i].y,R,0,2*Math.PI);
+            cxt.fillStyle = balls[i].color;
+            cxt.closePath();
+            cxt.fill();
+        }
+    }
+
+    clearInterval(oTimer);
+    var oTimer = setInterval(function(){
+        //更新时钟
+        updateDigitTime();
+        //更新小球状态
+        updateBalls();
+        //渲染
+        render();
+    },50);
+}
+
+})();
+</script>
+          
         </div>
       </section>
 
